@@ -6,8 +6,8 @@ import { pluginWorkspaceDev } from 'rsbuild-plugin-workspace-dev';
 
 export default defineConfig({
   root: path.join(__dirname, 'docs'),
-  title: 'Rslib Module Doc',
-  lang: 'en',
+  title: 'generic-form',
+  lang: 'es',
   builderConfig: {
     plugins: [
       pluginWorkspaceDev({
@@ -16,12 +16,18 @@ export default defineConfig({
     ],
   },
   plugins: [
-    pluginApiDocgen({
-      entries: {
-        Button: './src/Button.tsx',
-      },
-      apiParseTool: 'react-docgen-typescript',
-    }),
+
     pluginPreview(),
   ],
+
+  themeConfig: {
+    sidebar: {
+      '/': [
+        { text: 'GenericForm', link: '/generic-form' },
+        { text: 'useModalState', link: '/use-modal-state' },
+        { text: 'LanguageProvider', link: '/language-provider' },
+        { text: 'Notifications', link: '/notifications' }
+      ]
+    }
+  }
 });

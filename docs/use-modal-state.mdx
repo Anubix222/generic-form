@@ -1,0 +1,63 @@
+# useModalState
+
+Hook para controlar el estado de los modales generados por `GenericForm` cuando se usa con el prop `modalType`.
+
+Internamente usa [Jotai](https://jotai.org/) para manejar el estado global del modal activo.
+
+## Uso
+
+```tsx
+import { useModalState } from 'generic-form';
+
+const { modalState, modalActions } = useModalState();
+```
+
+## Retorno
+
+| Campo | Tipo | Descripción |
+|-------|------|-------------|
+| `modalState` | `string \| null` | Nombre del modal actualmente abierto. `null` si ninguno está abierto. |
+| `modalActions.open` | `(modalName: string) => void` | Abre el modal con el nombre indicado. |
+| `modalActions.close` | `() => void` | Cierra el modal activo. |
+
+## Ejemplo
+
+```tsx
+import { GenericForm, useModalState } from 'generic-form';
+
+export const UsuariosPage = () => {
+  const { modalActions } = useModalState();
+  const [idForEdit, setIdForEdit] = useState(null);
+
+  return (
+    <>
+      <button onClick={() => modalActions.open('usuario')}>
+        Nuevo usuario
+      </button>
+
+      <GenericForm
+        name="usuario"
+        modalType="sm"
+        endpointPath="/api/usuarios"
+        idForEdit={idForEdit}
+        setIdFunction={setIdForEdit}
+        controls={[
+          {
+            type: 'text',
+            name: 'nombre',
+            label: 'Nombre',
+            gridValues: { xs: 12 },
+            validations: { required: true },
+          },
+        ]}
+      />
+    </>
+  );
+};
+```
+
+## Notas
+
+- El modal se identifica por el `name` que se le pasa a `GenericForm`. El `open` debe recibir ese mismo nombre.
+- Solo puede haber un modal abierto a la vez.
+- El estado es global — cualquier componente que llame `useModalState` accede al mismo estado.

@@ -1,0 +1,91 @@
+# LanguageProvider
+
+Proveedor de internacionalización basado en [react-i18next](https://react.i18next.com/). Expone el contexto de traducción a todos los componentes de `generic-form`.
+
+Debe envolver la aplicación (o la parte que use componentes de `generic-form`) para que los labels y placeholders de los controles sean traducibles.
+
+## Configuración
+
+### 1. Inicializa i18next en tu proyecto
+
+Crea un archivo `src/i18n.ts`:
+
+```ts
+import i18n from 'i18next';
+import { initReactI18next } from 'react-i18next';
+
+i18n.use(initReactI18next).init({
+  lng: 'es',
+  fallbackLng: 'es',
+  resources: {
+    es: {
+      translation: {
+        'Nombre': 'Nombre',
+        'Apellido': 'Apellido',
+        // agrega aquí las claves que uses en los labels
+      },
+    },
+    en: {
+      translation: {
+        'Nombre': 'Name',
+        'Apellido': 'Last name',
+      },
+    },
+  },
+});
+
+export default i18n;
+```
+
+### 2. Importa la configuración e incluye el proveedor
+
+En tu `main.tsx`:
+
+```tsx
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import { LanguageProvider } from 'generic-form';
+import './i18n'; // inicializa i18next antes de renderizar
+import App from './App';
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <LanguageProvider>
+      <App />
+    </LanguageProvider>
+  </StrictMode>
+);
+```
+
+## useLanguage
+
+`LanguageProvider` expone un hook `useLanguage` para acceder al contexto de traducción en tus propios componentes:
+
+```tsx
+import { useLanguage } from 'generic-form';
+
+const MyComponent = () => {
+  const { t, language, changeLanguage } = useLanguage();
+
+  return (
+    <div>
+      <p>Idioma actual: {language}</p>
+      <button onClick={() => changeLanguage('en')}>English</button>
+      <button onClick={() => changeLanguage('es')}>Español</button>
+    </div>
+  );
+};
+```
+
+## Contexto expuesto
+
+| Campo | Tipo | Descripción |
+|-------|------|-------------|
+| `t` | `(key: string) => string` | Función de traducción. Recibe una clave y retorna el texto traducido. |
+| `language` | `string` | Código del idioma activo (ej: `"es"`, `"en"`). |
+| `changeLanguage` | `(lang: string) => void` | Cambia el idioma activo. |
+
+## Notas
+
+- Si no usas internacionalización, igual debes incluir `LanguageProvider` para que los componentes internos funcionen correctamente. Los labels se mostrarán tal cual sin traducción.
+- La inicialización de i18next (`i18n.init`) es responsabilidad del proyecto consumidor, no de la librería.
