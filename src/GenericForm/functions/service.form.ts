@@ -6,8 +6,9 @@ export const getRecordForEdit = async (
   endpointPath: any,
   args: any
 ): Promise<any> => {
+  //Arreglar esto todavia tengo dudas
   const { data } = await axios.get(
-    `${env.ENV_SERVER_URL}/gw/${endpointPath}?id=${idForEdit}`
+    `${env.ENV_SERVER_URL}${endpointPath}?id=${idForEdit}`
   );
   return data;
 };
@@ -19,7 +20,7 @@ export const submitValues = async (
 ): Promise<any> => {
   try {
     const { data } = await axios.request({
-      url: `${env.ENV_SERVER_URL}/gw/${endpointPath}`,
+      url: `${env.ENV_SERVER_URL}${endpointPath}`,
       method: idForEdit ? "PUT" : "POST",
       params: { id: idForEdit, name },
       data: values,

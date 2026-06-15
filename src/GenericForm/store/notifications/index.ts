@@ -1,15 +1,12 @@
 import { Actions, Notification } from "./types";
-import { atom, useRecoilState } from "recoil";
+import { atom, useAtom } from "jotai";
 import { useCallback, useMemo } from "react";
 import isMobile from "../../utils/is-mobile";
 
 import type { SnackbarKey } from "notistack";
 
 
-const notificationsState = atom<Notification[]>({
-    key: "notificationsState",
-    default: [],
-});
+const notificationsState = atom<Notification[]>([]);
 
 const notificationsDefaults: any = {
     options: {
@@ -25,7 +22,7 @@ const notificationsDefaults: any = {
 
 
 function useNotifications(): [Notification[], Actions] {
-    const [notifications, setNotifications] = useRecoilState(notificationsState);
+    const [notifications, setNotifications] = useAtom(notificationsState);
 
     const push = useCallback(
         (notification: Partial<Notification>) => {

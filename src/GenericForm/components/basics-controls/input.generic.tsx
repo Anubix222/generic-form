@@ -1,6 +1,5 @@
 import { Grid, TextField } from "@mui/material";
 import { useCallback, useEffect } from "react";
-
 import { useFormikContext } from "formik";
 import { useLanguage } from "../../hooks/use-language";
 
@@ -49,6 +48,8 @@ export const BasicTextFields = ({
   }, [valueRef]);
 
   function blocksInvalidChars(text: string) {
+    //Nueva linea para validar si existe pattern
+    if (!pattern) return false;
     for (const ch of text) if (!pattern.test(ch)) return true;
     return false;
   }
@@ -86,25 +87,25 @@ export const BasicTextFields = ({
         helperText={error}
         onKeyDown={(e) => {
           // Evita usar keyCode (deprecado). Permite teclas de control.
-          if (e.key.length === 1 && !pattern.test(e.key)) {
+          if (pattern && e.key.length === 1 && !pattern.test(e.key)) {
             e.preventDefault();
           }
         }}
         onBeforeInput={(e) => {
           // Cubre entradas compuestas (IME) y pegados en algunos navegadores
           const data = (e as any).data as string | undefined;
-          if (data && blocksInvalidChars(data)) e.preventDefault();
+          if (pattern && data && blocksInvalidChars(data)) e.preventDefault();
         }}
         onPaste={(e) => {
           const text = e.clipboardData.getData("text");
-          if (blocksInvalidChars(text)) {
+          if (pattern && blocksInvalidChars(text)) {
             e.preventDefault(); // bloquea pegado si trae algo inv�lido
           }
         }}
         onDrop={(e) => {
           // Evita que arrastren texto inv�lido dentro del campo
           const text = e.dataTransfer?.getData("text") ?? "";
-          if (blocksInvalidChars(text)) {
+          if (pattern && blocksInvalidChars(text)) {
             e.preventDefault();
           }
         }}

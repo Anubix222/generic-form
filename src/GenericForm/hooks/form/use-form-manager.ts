@@ -1,18 +1,15 @@
 import { useCallback, useMemo } from "react";
-import { atom, useRecoilState } from "recoil";
+import { atom, useAtom } from "jotai";
 
 import type { Actions } from "./types";
 
-const modalOpenState = atom<string | null>({
-    key: "generic-form-modal-state",
-    default: null,
-});
+const modalOpenState = atom<string | null>(null);
 
 function useModalState(): {
     modalState: string | null;
     modalActions: Actions;
 } {
-    const [modalState, setIsOpen] = useRecoilState(modalOpenState);
+    const [modalState, setIsOpen] = useAtom(modalOpenState);
 
     const close = useCallback(() => {
         setIsOpen(null);

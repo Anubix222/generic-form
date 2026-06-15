@@ -1,7 +1,7 @@
 import isMobile from "../utils/is-mobile";
 
 const env = {
-    ENV_SERVER_URL: import.meta.env.ENV_SERVER_URL,
+    ENV_SERVER_URL: import.meta.env.ENV_SERVER_URL || "http://ejemplo:8000",
     ENV_MODE: import.meta.env.ENV_MODE,
     ENV_SGR_MENU: import.meta.env.ENV_SGR_MENU
 };

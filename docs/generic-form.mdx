@@ -1,0 +1,353 @@
+# GenericForm
+
+`GenericForm` es el componente principal de la librería. Genera formularios dinámicos a partir de un array de controles, maneja validaciones con Yup/Formik, y puede conectarse a un backend automáticamente o recibir una función de submit personalizada.
+
+## Uso básico
+
+```tsx
+import { GenericForm } from "generic-form";
+
+<GenericForm
+  name="usuario"
+  endpointPath="/api/usuarios"
+  controls={[
+    {
+      type: "text",
+      name: "nombre",
+      label: "Nombre",
+      gridValues: { xs: 12, sm: 6 },
+      validations: { required: true },
+    },
+    {
+      type: "text",
+      name: "apellido",
+      label: "Apellido",
+      gridValues: { xs: 12, sm: 6 },
+      validations: { required: true },
+    },
+    {
+      type: "number",
+      name: "edad",
+      label: "Edad",
+      format: "units",
+      gridValues: { xs: 12, sm: 6 },
+    },
+  ]}
+/>;
+```
+
+## Props
+
+### Props requeridas
+
+| Prop           | Tipo                 | Descripción                                                                       |
+| -------------- | -------------------- | --------------------------------------------------------------------------------- |
+| `name`         | `string`             | Identificador del formulario. Se usa internamente para el submit.                 |
+| `endpointPath` | `string`             | Ruta del endpoint REST. Se usa si no se provee `submitFunction`.                  |
+| `controls`     | `IGenericControls[]` | Array de controles que componen el formulario. Ver sección [Controls](#controls). |
+
+### Props opcionales — Títulos y descripciones
+
+| Prop                      | Tipo      | Descripción                                           |
+| ------------------------- | --------- | ----------------------------------------------------- |
+| `title`                   | `string`  | Título general del formulario.                        |
+| `editTitle`               | `string`  | Título cuando el formulario está en modo edición.     |
+| `createTitle`             | `string`  | Título cuando el formulario está en modo creación.    |
+| `description`             | `string`  | Descripción general del formulario.                   |
+| `descriptionOnCreate`     | `string`  | Descripción en modo creación.                         |
+| `descriptionOnEdit`       | `string`  | Descripción en modo edición.                          |
+| `showSpecificDescription` | `boolean` | Habilita descripciones distintas para crear y editar. |
+
+### Props opcionales — Comportamiento
+
+| Prop             | Tipo                                                 | Descripción                                                                      |
+| ---------------- | ---------------------------------------------------- | -------------------------------------------------------------------------------- |
+| `idForEdit`      | `string \| number \| null`                           | ID del registro a editar. Si se provee, el formulario entra en modo edición.     |
+| `connectionMode` | `"multiple" \| "unified" \| "grouped" \| "onDemand"` | Modo de conexión al backend para cargar los datasources.                         |
+| `modalType`      | `"xs" \| "sm" \| "md" \| "lg" \| "xl" \| "fullWith"` | Si se provee, el formulario se renderiza dentro de un modal del tamaño indicado. |
+| `hideButtons`    | `boolean`                                            | Oculta los botones de acción (Aceptar, Aplicar, etc.).                           |
+| `saveOnDirty`    | `boolean`                                            | Habilita el guardado automático cuando el formulario tiene cambios.              |
+
+### Props opcionales — Funciones personalizadas
+
+| Prop               | Tipo                                                     | Descripción                                                                               |
+| ------------------ | -------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `submitFunction`   | `(values, name, idForEdit, event) => void`               | Reemplaza el submit por defecto. Recibe los valores limpios del formulario.               |
+| `getByIdFunction`  | `(idForEdit) => any`                                     | Reemplaza la llamada GET por defecto para cargar datos en modo edición.                   |
+| `setIdFunction`    | `(idForEdit) => void`                                    | Función para actualizar el ID externo al cerrar el modal.                                 |
+| `notifyValidation` | `(values?) => Promise<string \| void> \| string \| void` | Validación personalizada antes del submit. Si retorna un string, se muestra como warning. |
+
+### Props opcionales — Botones de navegación
+
+| Prop          | Tipo                                                                    | Descripción                                                                |
+| ------------- | ----------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| `applyButton` | `boolean`                                                               | Muestra u oculta el botón "Aplicar". Por defecto visible en modo creación. |
+| `nextButton`  | `{ text: string, action: (values?) => void, submitOnAction?: boolean }` | Botón "Siguiente" con acción personalizada.                                |
+| `prevButton`  | `{ text: string, action: (values?) => void, submitOnAction?: boolean }` | Botón "Anterior" con acción personalizada.                                 |
+| `dataAction`  | `{ label: string, action: (values) => void }[]`                         | Botones de acción adicionales.                                             |
+
+### Props opcionales — Control de estado de botones
+
+| Prop                     | Tipo                   | Descripción                                                      |
+| ------------------------ | ---------------------- | ---------------------------------------------------------------- |
+| `acceptDisabledFunction` | `(values?) => boolean` | Deshabilita el botón "Aceptar" según los valores del formulario. |
+| `applyDisabledFunction`  | `(values?) => boolean` | Deshabilita el botón "Aplicar".                                  |
+| `submitDisabledFunction` | `(values?) => boolean` | Deshabilita ambos botones de submit.                             |
+| `nextDisabledFunction`   | `(values?) => boolean` | Deshabilita el botón "Siguiente".                                |
+| `prevDisabledFunction`   | `(values?) => boolean` | Deshabilita el botón "Anterior".                                 |
+
+### Props opcionales — Estilos
+
+| Prop              | Tipo      | Descripción                                                            |
+| ----------------- | --------- | ---------------------------------------------------------------------- |
+| `sx`              | `SxProps` | Estilos del contenedor del contenido del formulario (`DialogContent`). |
+| `gridContainerSx` | `SxProps` | Estilos del `Grid` container que envuelve los controles.               |
+
+---
+
+## Controls
+
+El prop `controls` acepta un array de objetos donde cada uno define un control del formulario. Todos los controles comparten props base, y cada tipo agrega las suyas.
+
+### Props comunes a todos los controles
+
+| Prop             | Tipo                          | Descripción                                                        |
+| ---------------- | ----------------------------- | ------------------------------------------------------------------ |
+| `name`           | `string`                      | Nombre del campo en Formik. Debe ser único dentro del formulario.  |
+| `label`          | `string`                      | Etiqueta visible del campo.                                        |
+| `gridValues`     | `{ xs?, sm?, md?, lg?, xl? }` | Tamaño del campo en el grid (1-12).                                |
+| `disabled`       | `(values) => boolean`         | Función que deshabilita el campo según los valores del formulario. |
+| `hidden`         | `(values) => boolean`         | Función que oculta el campo según los valores del formulario.      |
+| `initialValue`   | `any`                         | Valor inicial del campo.                                           |
+| `disabledOnEdit` | `boolean`                     | Deshabilita el campo cuando el formulario está en modo edición.    |
+| `persist`        | `boolean`                     | Mantiene el valor del campo aunque esté oculto.                    |
+
+---
+
+### `type: "text"` — Campo de texto
+
+```tsx
+{
+  type: 'text',
+  name: 'descripcion',
+  label: 'Descripción',
+  gridValues: { xs: 12 },
+  pattern: /^[a-zA-Z\s]*$/, // solo letras y espacios
+  multiline: { minRows: 3, maxRows: 6 },
+  validations: { required: true, minLength: 5, maxLength: 200 },
+}
+```
+
+| Prop          | Tipo                                | Descripción                                                     |
+| ------------- | ----------------------------------- | --------------------------------------------------------------- |
+| `pattern`     | `RegExp`                            | Expresión regular que bloquea caracteres inválidos al escribir. |
+| `multiline`   | `boolean \| { minRows?, maxRows? }` | Convierte el campo en un textarea.                              |
+| `validations` | `ITextValidation`                   | Validaciones del campo.                                         |
+
+---
+
+### `type: "number"` — Campo numérico
+
+```tsx
+{
+  type: 'number',
+  name: 'precio',
+  label: 'Precio',
+  format: 'finance',
+  prefix: '$',
+  decimalScale: 2,
+  gridValues: { xs: 12, sm: 6 },
+  validations: { required: true, min: 0 },
+}
+```
+
+| Prop             | Tipo                              | Descripción                              |
+| ---------------- | --------------------------------- | ---------------------------------------- |
+| `format`         | `"units" \| "finance" \| "other"` | Formato de presentación del número.      |
+| `prefix`         | `string`                          | Prefijo visual del campo (ej: `$`, `€`). |
+| `decimalScale`   | `number`                          | Número de decimales permitidos.          |
+| `negativeValues` | `boolean`                         | Permite valores negativos.               |
+
+---
+
+### `type: "select"` — Selector simple
+
+```tsx
+{
+  type: 'select',
+  name: 'categoria',
+  label: 'Categoría',
+  gridValues: { xs: 12, sm: 6 },
+  options: [
+    { label: 'Opción A', value: 'a' },
+    { label: 'Opción B', value: 'b' },
+  ],
+  validations: { required: true },
+}
+```
+
+---
+
+### `type: "autocomplete"` — Autocomplete
+
+```tsx
+{
+  type: 'autocomplete',
+  name: 'pais',
+  label: 'País',
+  gridValues: { xs: 12, sm: 6 },
+  options: [
+    { label: 'Cuba', value: 'cu' },
+    { label: 'España', value: 'es' },
+  ],
+}
+```
+
+---
+
+### `type: "date"` — Selector de fecha
+
+```tsx
+{
+  type: 'date',
+  name: 'fechaNacimiento',
+  label: 'Fecha de nacimiento',
+  gridValues: { xs: 12, sm: 6 },
+  validations: { required: true },
+}
+```
+
+---
+
+### `type: "check"` — Checkbox
+
+```tsx
+{
+  type: 'check',
+  name: 'activo',
+  label: 'Activo',
+  gridValues: { xs: 12, sm: 6 },
+}
+```
+
+---
+
+### `type: "switch"` — Switch
+
+```tsx
+{
+  type: 'switch',
+  name: 'habilitado',
+  label: 'Habilitado',
+  gridValues: { xs: 12, sm: 6 },
+}
+```
+
+---
+
+### `type: "slider"` — Slider
+
+```tsx
+{
+  type: 'slider',
+  name: 'porcentaje',
+  label: 'Porcentaje',
+  min: 0,
+  max: 100,
+  gridValues: { xs: 12 },
+}
+```
+
+---
+
+### `type: "radio"` — Radio buttons
+
+```tsx
+{
+  type: 'radio',
+  name: 'genero',
+  label: 'Género',
+  direction: 'row',
+  radios: [
+    { label: 'Masculino', value: 'M' },
+    { label: 'Femenino', value: 'F' },
+  ],
+  gridValues: { xs: 12 },
+}
+```
+
+---
+
+### `type: "component"` — Componente personalizado
+
+Permite inyectar cualquier componente React dentro del formulario con acceso al contexto de Formik.
+
+```tsx
+{
+  type: 'component',
+  name: 'custom',
+  label: '',
+  gridValues: { xs: 12 },
+  component: ({ values, setFieldValue }) => (
+    <div>
+      <p>Valor actual: {values.custom}</p>
+      <button onClick={() => setFieldValue('custom', 'nuevo valor')}>
+        Cambiar
+      </button>
+    </div>
+  ),
+}
+```
+
+---
+
+## Ejemplo completo
+
+```tsx
+import { GenericForm } from "generic-form";
+
+export const FormularioUsuario = ({ idForEdit, onClose }) => (
+  <GenericForm
+    name="usuario"
+    title="Nuevo usuario"
+    editTitle="Editar usuario"
+    endpointPath="/api/usuarios"
+    idForEdit={idForEdit}
+    setIdFunction={onClose}
+    controls={[
+      {
+        type: "text",
+        name: "nombre",
+        label: "Nombre",
+        gridValues: { xs: 12, sm: 6 },
+        validations: { required: true },
+      },
+      {
+        type: "text",
+        name: "apellido",
+        label: "Apellido",
+        gridValues: { xs: 12, sm: 6 },
+        validations: { required: true },
+      },
+      {
+        type: "select",
+        name: "rol",
+        label: "Rol",
+        gridValues: { xs: 12, sm: 6 },
+        options: [
+          { label: "Admin", value: "admin" },
+          { label: "Usuario", value: "user" },
+        ],
+        validations: { required: true },
+      },
+      {
+        type: "check",
+        name: "activo",
+        label: "Activo",
+        gridValues: { xs: 12, sm: 6 },
+        initialValue: true,
+      },
+    ]}
+  />
+);
+```

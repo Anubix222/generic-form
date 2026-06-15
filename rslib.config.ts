@@ -37,7 +37,7 @@ export default defineConfig({
       'notistack': 'notistack',
       'react-i18next': 'react-i18next',
       'react-number-format': 'react-number-format',
-      'recoil': 'recoil',
+      'jotai': 'jotai',
       'yup': 'yup',
     }
   },

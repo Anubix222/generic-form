@@ -1,11 +1,8 @@
-import { atom, useRecoilState } from "recoil";
+import { atom, useAtom } from "jotai";
 
-const formDataSource = atom<any>({
-    key: "generic-form-data-source",
-    default: null,
-});
+const formDataSource = atom<any>(null);
 
 function useFormDataSource() {
-    return useRecoilState(formDataSource);
+    return useAtom(formDataSource);
 }
 export default useFormDataSource;
