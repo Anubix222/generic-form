@@ -24,24 +24,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: latest
-
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 26
-          cache: pnpm
 
       - name: Install dependencies
-        run: |
-          pnpm config set ignore-scripts false
-          pnpm install
+        run: npm install --legacy-peer-deps
 
       - name: Build docs
-        run: pnpm doc:build
+        run: npm run doc:build
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
