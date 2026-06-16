@@ -1,5 +1,552 @@
-# generic-form
+# GenericForm
 
-Librería de formularios dinámicos para React basada en MUI v9, Formik y Yup.
+Componente principal de la librería. Genera formularios dinámicos a partir de un array de controles, maneja validaciones con Yup/Formik, y puede conectarse a un backend automáticamente o recibir una función de submit personalizada.
 
-Selecciona un componente en el sidebar para ver su documentación.
+## Uso básico
+
+```tsx
+import { GenericForm } from "generic-form";
+
+<GenericForm
+  name="usuario"
+  endpointPath="/api/usuarios"
+  controls={[
+    {
+      type: "text",
+      name: "nombre",
+      label: "Nombre",
+      gridValues: { xs: 12, sm: 6 },
+      validations: { required: true },
+    },
+    {
+      type: "number",
+      name: "edad",
+      label: "Edad",
+      format: "units",
+      gridValues: { xs: 12, sm: 6 },
+    },
+  ]}
+/>;
+```
+
+---
+
+## Props de GenericForm
+
+### Requeridas
+
+| Prop           | Tipo                 | Descripción                                                           |
+| -------------- | -------------------- | --------------------------------------------------------------------- |
+| `name`         | `string`             | Identificador del formulario. Se usa internamente para el submit.     |
+| `endpointPath` | `string`             | Ruta del endpoint REST. Se usa si no se provee `submitFunction`.      |
+| `controls`     | `IGenericControls[]` | Array de controles del formulario. Ver sección [Controls](#controls). |
+
+### Títulos y descripciones
+
+| Prop                      | Tipo      | Descripción                                           |
+| ------------------------- | --------- | ----------------------------------------------------- |
+| `title`                   | `string`  | Título general del formulario.                        |
+| `editTitle`               | `string`  | Título en modo edición.                               |
+| `createTitle`             | `string`  | Título en modo creación.                              |
+| `description`             | `string`  | Descripción general.                                  |
+| `descriptionOnCreate`     | `string`  | Descripción en modo creación.                         |
+| `descriptionOnEdit`       | `string`  | Descripción en modo edición.                          |
+| `showSpecificDescription` | `boolean` | Habilita descripciones distintas para crear y editar. |
+
+### Comportamiento
+
+| Prop             | Tipo                                                 | Descripción                                                                      |
+| ---------------- | ---------------------------------------------------- | -------------------------------------------------------------------------------- |
+| `idForEdit`      | `string \| number \| null`                           | ID del registro a editar. Si se provee, el formulario entra en modo edición.     |
+| `connectionMode` | `"multiple" \| "unified" \| "grouped" \| "onDemand"` | Modo de conexión al backend para cargar datasources.                             |
+| `modalType`      | `"xs" \| "sm" \| "md" \| "lg" \| "xl" \| "fullWith"` | Si se provee, el formulario se renderiza dentro de un modal del tamaño indicado. |
+| `hideButtons`    | `boolean`                                            | Oculta los botones de acción.                                                    |
+| `saveOnDirty`    | `boolean`                                            | Habilita el guardado automático cuando hay cambios.                              |
+
+### Funciones personalizadas
+
+| Prop               | Tipo                                                     | Descripción                                                                               |
+| ------------------ | -------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `submitFunction`   | `(values, name, idForEdit, event) => void`               | Reemplaza el submit por defecto.                                                          |
+| `getByIdFunction`  | `(idForEdit) => any`                                     | Reemplaza la llamada GET para cargar datos en modo edición.                               |
+| `setIdFunction`    | `(idForEdit) => void`                                    | Actualiza el ID externo al cerrar el modal.                                               |
+| `notifyValidation` | `(values?) => Promise<string \| void> \| string \| void` | Validación personalizada antes del submit. Si retorna un string, se muestra como warning. |
+
+### Botones de navegación
+
+| Prop          | Tipo                                                                    | Descripción                                                                |
+| ------------- | ----------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| `applyButton` | `boolean`                                                               | Muestra u oculta el botón "Aplicar". Visible por defecto en modo creación. |
+| `nextButton`  | `{ text: string, action: (values?) => void, submitOnAction?: boolean }` | Botón "Siguiente".                                                         |
+| `prevButton`  | `{ text: string, action: (values?) => void, submitOnAction?: boolean }` | Botón "Anterior".                                                          |
+| `dataAction`  | `{ label: string, action: (values) => void }[]`                         | Botones de acción adicionales.                                             |
+
+### Control de estado de botones
+
+| Prop                     | Tipo                   | Descripción                          |
+| ------------------------ | ---------------------- | ------------------------------------ |
+| `acceptDisabledFunction` | `(values?) => boolean` | Deshabilita el botón "Aceptar".      |
+| `applyDisabledFunction`  | `(values?) => boolean` | Deshabilita el botón "Aplicar".      |
+| `submitDisabledFunction` | `(values?) => boolean` | Deshabilita ambos botones de submit. |
+| `nextDisabledFunction`   | `(values?) => boolean` | Deshabilita el botón "Siguiente".    |
+| `prevDisabledFunction`   | `(values?) => boolean` | Deshabilita el botón "Anterior".     |
+
+### Estilos
+
+| Prop              | Tipo      | Descripción                                             |
+| ----------------- | --------- | ------------------------------------------------------- |
+| `sx`              | `SxProps` | Estilos del contenedor del contenido (`DialogContent`). |
+| `gridContainerSx` | `SxProps` | Estilos del Grid container que envuelve los controles.  |
+
+---
+
+## Controls
+
+El prop `controls` acepta un array donde cada objeto define un control. Todos comparten props comunes, y cada tipo agrega las suyas.
+
+### Props comunes (ICommonProps)
+
+Todos los controles heredan estas props:
+
+| Prop             | Tipo                          | Descripción                                                       |
+| ---------------- | ----------------------------- | ----------------------------------------------------------------- |
+| `name`           | `string`                      | Nombre del campo en Formik. Debe ser único dentro del formulario. |
+| `label`          | `string`                      | Etiqueta visible del campo.                                       |
+| `id`             | `string`                      | ID del elemento HTML. Por defecto usa `name`.                     |
+| `placeholder`    | `string`                      | Texto de placeholder.                                             |
+| `sx`             | `SxProps`                     | Estilos del control.                                              |
+| `gridValues`     | `IGridValues`                 | Tamaño del campo en el grid. Ver [IGridValues](#igridvalues).     |
+| `gridSx`         | `SxProps`                     | Estilos del Grid item que envuelve el control.                    |
+| `disabled`       | `(values?, refs?) => boolean` | Deshabilita el campo según los valores del formulario.            |
+| `hidden`         | `(values?, refs?) => boolean` | Oculta el campo según los valores del formulario.                 |
+| `onChange`       | `(event?, refs?) => void`     | Callback al cambiar el valor del campo.                           |
+| `disabledOnEdit` | `boolean`                     | Deshabilita el campo en modo edición.                             |
+| `persist`        | `boolean`                     | Mantiene el valor aunque el campo esté oculto.                    |
+
+### IGridValues
+
+| Prop | Tipo   | Descripción                         |
+| ---- | ------ | ----------------------------------- |
+| `xs` | `1-12` | Tamaño en pantallas extra pequeñas. |
+| `sm` | `1-12` | Tamaño en pantallas pequeñas.       |
+| `md` | `1-12` | Tamaño en pantallas medianas.       |
+| `lg` | `1-12` | Tamaño en pantallas grandes.        |
+| `xl` | `1-12` | Tamaño en pantallas extra grandes.  |
+
+---
+
+### `type: "text"` — Campo de texto
+
+Hereda `IInputProps` (extiende `ICommonProps` con `color`, `fullWidth`, `focused`, `defaultValue`).
+
+```tsx
+{
+  type: 'text',
+  name: 'descripcion',
+  label: 'Descripción',
+  gridValues: { xs: 12 },
+  pattern: /^[a-zA-Z\s]*$/,
+  multiline: { minRows: 3, maxRows: 6 },
+  validations: { required: true, minLength: 5, maxLength: 200 },
+}
+```
+
+| Prop           | Tipo                                                                      | Descripción                               |
+| -------------- | ------------------------------------------------------------------------- | ----------------------------------------- |
+| `pattern`      | `RegExp`                                                                  | Bloquea caracteres inválidos al escribir. |
+| `multiline`    | `boolean \| { minRows?, maxRows? }`                                       | Convierte el campo en textarea.           |
+| `color`        | `"primary" \| "secondary" \| "success" \| "error" \| "info" \| "warning"` | Color del campo.                          |
+| `focused`      | `boolean`                                                                 | Mantiene el campo enfocado.               |
+| `defaultValue` | `string`                                                                  | Valor por defecto.                        |
+| `validations`  | `ITextValidation`                                                         | Validaciones del campo.                   |
+
+---
+
+### `type: "number"` — Campo numérico
+
+Hereda `IInputProps`.
+
+```tsx
+{
+  type: 'number',
+  name: 'precio',
+  label: 'Precio',
+  format: 'finance',
+  prefix: '$',
+  decimalScale: 2,
+  gridValues: { xs: 12, sm: 6 },
+  validations: { required: true, min: 0 },
+}
+```
+
+| Prop                  | Tipo                              | Descripción                         |
+| --------------------- | --------------------------------- | ----------------------------------- |
+| `format`              | `"units" \| "finance" \| "other"` | Formato de presentación del número. |
+| `prefix`              | `string`                          | Prefijo visual (ej: `$`, `€`).      |
+| `decimalScale`        | `number`                          | Número de decimales permitidos.     |
+| `fixDecimalSeparator` | `boolean`                         | Fija el separador decimal.          |
+| `avoidSeparator`      | `boolean`                         | Evita el separador de miles.        |
+| `negativeValues`      | `boolean`                         | Permite valores negativos.          |
+| `mask`                | `string`                          | Máscara de formato.                 |
+| `validations`         | `INumberValidation`               | Validaciones del campo.             |
+
+---
+
+### `type: "select"` — Selector simple
+
+Hereda `IOptionsProps` (extiende `ICommonProps` con `options`, `defaultValue`, `url`, `group`).
+
+```tsx
+{
+  type: 'select',
+  name: 'categoria',
+  label: 'Categoría',
+  gridValues: { xs: 12, sm: 6 },
+  options: [
+    { label: 'Opción A', value: 'a' },
+    { label: 'Opción B', value: 'b' },
+  ],
+  validations: { required: true },
+}
+```
+
+| Prop           | Tipo                 | Descripción                                |
+| -------------- | -------------------- | ------------------------------------------ |
+| `options`      | `any[]`              | Array de opciones.                         |
+| `url`          | `string`             | URL para cargar opciones desde el backend. |
+| `group`        | `boolean`            | Agrupa las opciones.                       |
+| `defaultValue` | `string \| string[]` | Valor por defecto.                         |
+| `checkValues`  | `any[]`              | Valores a resaltar.                        |
+| `showDelete`   | `boolean`            | Muestra botón para limpiar la selección.   |
+| `validations`  | `ISelectValidation`  | Validaciones del campo.                    |
+
+---
+
+### `type: "multiselect"` — Selector múltiple
+
+Mismas props que `select` sin `showDelete`, con soporte para selección múltiple.
+
+```tsx
+{
+  type: 'multiselect',
+  name: 'categorias',
+  label: 'Categorías',
+  gridValues: { xs: 12 },
+  options: [
+    { label: 'Opción A', value: 'a' },
+    { label: 'Opción B', value: 'b' },
+  ],
+}
+```
+
+---
+
+### `type: "autocomplete"` — Autocomplete
+
+Hereda `IOptionsProps`.
+
+```tsx
+{
+  type: 'autocomplete',
+  name: 'pais',
+  label: 'País',
+  gridValues: { xs: 12, sm: 6 },
+  options: [
+    { label: 'Cuba', value: 'cu' },
+    { label: 'España', value: 'es' },
+  ],
+  loadingText: 'Cargando...',
+}
+```
+
+| Prop          | Tipo     | Descripción                         |
+| ------------- | -------- | ----------------------------------- |
+| `loadingText` | `string` | Texto mientras cargan las opciones. |
+
+---
+
+### `type: "date"` — Selector de fecha
+
+Hereda `ITimeControls` (extiende `ICommonProps` con `disableFuture`, `disablePast`, `maxDate`, `minDate`, `defaultValue`).
+
+```tsx
+{
+  type: 'date',
+  name: 'fechaNacimiento',
+  label: 'Fecha de nacimiento',
+  gridValues: { xs: 12, sm: 6 },
+  disableFuture: true,
+  validations: { required: true },
+}
+```
+
+| Prop            | Tipo      | Descripción                 |
+| --------------- | --------- | --------------------------- |
+| `disableFuture` | `boolean` | Deshabilita fechas futuras. |
+| `disablePast`   | `boolean` | Deshabilita fechas pasadas. |
+| `maxDate`       | `string`  | Fecha máxima seleccionable. |
+| `minDate`       | `string`  | Fecha mínima seleccionable. |
+| `defaultValue`  | `string`  | Fecha por defecto.          |
+
+---
+
+### `type: "time"` — Selector de hora
+
+Mismas props que `date`.
+
+```tsx
+{
+  type: 'time',
+  name: 'horaInicio',
+  label: 'Hora de inicio',
+  gridValues: { xs: 12, sm: 6 },
+}
+```
+
+---
+
+### `type: "radio"` — Radio buttons
+
+Hereda `ICommonProps`.
+
+```tsx
+{
+  type: 'radio',
+  name: 'genero',
+  label: 'Género',
+  direction: 'row',
+  radios: [
+    { denominacion: 'Masculino', idconcepto: 'M' },
+    { denominacion: 'Femenino', idconcepto: 'F' },
+  ],
+  gridValues: { xs: 12 },
+}
+```
+
+| Prop             | Tipo                                             | Descripción                     |
+| ---------------- | ------------------------------------------------ | ------------------------------- |
+| `radios`         | `{ denominacion: string, idconcepto: string }[]` | Opciones del radio group.       |
+| `direction`      | `"row" \| "col"`                                 | Dirección del grupo.            |
+| `labelPlacement` | `"top" \| "start" \| "bottom" \| "end"`          | Posición del label.             |
+| `defaultValue`   | `string`                                         | Valor seleccionado por defecto. |
+| `url`            | `string`                                         | URL para cargar opciones.       |
+
+---
+
+### `type: "check"` — Checkbox
+
+Hereda `IChecks` (extiende `ICommonProps` con `labelPlacement`, `color`, `defaultValue`) e `ICustomIcons`.
+
+```tsx
+{
+  type: 'check',
+  name: 'activo',
+  label: 'Activo',
+  defaultValue: true,
+  gridValues: { xs: 12, sm: 6 },
+}
+```
+
+| Prop             | Tipo                                    | Descripción                                     |
+| ---------------- | --------------------------------------- | ----------------------------------------------- |
+| `defaultValue`   | `boolean`                               | Valor por defecto.                              |
+| `color`          | `string`                                | Color del checkbox (hex o nombre de color MUI). |
+| `labelPlacement` | `"top" \| "start" \| "bottom" \| "end"` | Posición del label.                             |
+| `customIcons`    | `{ outlinedIcon, filledIcon }`          | Íconos personalizados de MUI Icons.             |
+
+---
+
+### `type: "switch"` — Switch
+
+Hereda `IChecks`. Mismas props que `check` sin `customIcons`.
+
+```tsx
+{
+  type: 'switch',
+  name: 'habilitado',
+  label: 'Habilitado',
+  defaultValue: false,
+  gridValues: { xs: 12, sm: 6 },
+}
+```
+
+---
+
+### `type: "slider"` — Slider
+
+Hereda `ICommonProps`.
+
+```tsx
+{
+  type: 'slider',
+  name: 'porcentaje',
+  label: 'Porcentaje',
+  min: 0,
+  max: 100,
+  defaultValue: 50,
+  gridValues: { xs: 12 },
+}
+```
+
+| Prop                | Tipo                      | Descripción                                       |
+| ------------------- | ------------------------- | ------------------------------------------------- |
+| `min`               | `number`                  | ✅ Valor mínimo.                                  |
+| `max`               | `number`                  | ✅ Valor máximo.                                  |
+| `defaultValue`      | `number`                  | Valor inicial.                                    |
+| `step`              | `number`                  | Incremento del slider.                            |
+| `mark`              | `boolean`                 | Muestra marcas en el slider.                      |
+| `startIcon`         | `IconNames`               | Ícono al inicio del slider (nombre de MUI Icons). |
+| `endIcon`           | `IconNames`               | Ícono al final del slider.                        |
+| `valueLabelDisplay` | `"auto" \| "on" \| "off"` | Cuándo mostrar el valor.                          |
+
+---
+
+### `type: "rating"` — Rating
+
+Hereda `ICommonProps` e `ICustomIcons`.
+
+```tsx
+{
+  type: 'rating',
+  name: 'puntuacion',
+  label: 'Puntuación',
+  max: 5,
+  defaultValue: 3,
+  color: 'yellow',
+  gridValues: { xs: 12, sm: 6 },
+}
+```
+
+| Prop           | Tipo                           | Descripción                                   |
+| -------------- | ------------------------------ | --------------------------------------------- |
+| `max`          | `number`                       | Número máximo de estrellas.                   |
+| `defaultValue` | `number`                       | Valor inicial.                                |
+| `precision`    | `boolean`                      | Permite medias estrellas.                     |
+| `color`        | `IconColor`                    | Color de las estrellas (nombre de color MUI). |
+| `customIcons`  | `{ outlinedIcon, filledIcon }` | Íconos personalizados.                        |
+
+---
+
+### `type: "scanner"` — Escáner QR
+
+Hereda `ICommonProps`.
+
+```tsx
+{
+  type: 'scanner',
+  name: 'codigo',
+  label: 'Escanear código',
+  parseFunction: (result) => ({ codigo: result.text }),
+  closeOnScan: true,
+  gridValues: { xs: 12 },
+}
+```
+
+| Prop            | Tipo                              | Descripción                                                        |
+| --------------- | --------------------------------- | ------------------------------------------------------------------ |
+| `parseFunction` | `(result) => Record<string, any>` | ✅ Transforma el resultado del scan en valores para el formulario. |
+| `closeOnScan`   | `boolean`                         | ✅ Cierra el scanner automáticamente al escanear.                  |
+
+---
+
+### `type: "component"` — Componente personalizado
+
+Permite inyectar cualquier componente React con acceso al contexto de Formik.
+
+```tsx
+{
+  type: 'component',
+  name: 'custom',
+  label: '',
+  gridValues: { xs: 12 },
+  component: ({ values, setFieldValue, error }) => (
+    <div>
+      <p>Valor actual: {values.custom}</p>
+      {error && <span style={{ color: 'red' }}>{error}</span>}
+      <button onClick={() => setFieldValue('custom', 'nuevo valor')}>
+        Cambiar
+      </button>
+    </div>
+  ),
+}
+```
+
+| Prop recibido     | Tipo                    | Descripción                      |
+| ----------------- | ----------------------- | -------------------------------- |
+| `values`          | `any`                   | Valores actuales del formulario. |
+| `setFieldValue`   | `(name, value) => void` | Actualiza el valor de un campo.  |
+| `setFieldTouched` | `(name) => void`        | Marca un campo como tocado.      |
+| `formValue`       | `any`                   | Valor actual del campo.          |
+| `error`           | `any`                   | Error de validación del campo.   |
+| `initialValue`    | `any`                   | Valor inicial del campo.         |
+| `gridValues`      | `IGridValues`           | Tamaño en el grid.               |
+| `disabled`        | `any`                   | Función de deshabilitado.        |
+| `hidden`          | `any`                   | Función de ocultado.             |
+
+---
+
+## Ejemplo completo
+
+```tsx
+import { GenericForm } from "generic-form";
+
+export const FormularioUsuario = ({ idForEdit, onClose }) => (
+  <GenericForm
+    name="usuario"
+    title="Nuevo usuario"
+    editTitle="Editar usuario"
+    endpointPath="/api/usuarios"
+    idForEdit={idForEdit}
+    setIdFunction={onClose}
+    controls={[
+      {
+        type: "text",
+        name: "nombre",
+        label: "Nombre",
+        gridValues: { xs: 12, sm: 6 },
+        validations: { required: true },
+      },
+      {
+        type: "text",
+        name: "apellido",
+        label: "Apellido",
+        gridValues: { xs: 12, sm: 6 },
+        validations: { required: true },
+      },
+      {
+        type: "select",
+        name: "rol",
+        label: "Rol",
+        gridValues: { xs: 12, sm: 6 },
+        options: [
+          { label: "Admin", value: "admin" },
+          { label: "Usuario", value: "user" },
+        ],
+        validations: { required: true },
+      },
+      {
+        type: "number",
+        name: "edad",
+        label: "Edad",
+        format: "units",
+        gridValues: { xs: 12, sm: 6 },
+        validations: { required: true, min: 18 },
+      },
+      {
+        type: "date",
+        name: "fechaIngreso",
+        label: "Fecha de ingreso",
+        gridValues: { xs: 12, sm: 6 },
+        disableFuture: true,
+      },
+      {
+        type: "check",
+        name: "activo",
+        label: "Activo",
+        gridValues: { xs: 12, sm: 6 },
+        defaultValue: true,
+      },
+    ]}
+  />
+);
+```
