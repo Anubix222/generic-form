@@ -64,8 +64,8 @@ export const FormularioUsuario = () => (
         label: "Rol",
         gridValues: { xs: 12, sm: 6 },
         options: [
-          { label: "Admin", value: "admin" },
-          { label: "Usuario", value: "user" },
+          { denominacion: "Admin", idconcepto: "admin" },
+          { denominacion: "Usuario", idconcepto: "user" },
         ],
         validations: { required: { message: "Este campo es requerido" } },
       },
