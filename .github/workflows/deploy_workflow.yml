@@ -36,9 +36,10 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --shamefully-hoist
         env:
-          PNPM_BUILD_APPROVED: esbuild
+          CI: true
+          PNPM_ALLOW_ARBITRARY_ROOT_SCRIPTS: true
 
       - name: Build docs
         run: pnpm doc:build
