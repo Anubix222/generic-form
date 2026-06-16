@@ -36,10 +36,9 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install --shamefully-hoist
-        env:
-          CI: true
-          PNPM_ALLOW_ARBITRARY_ROOT_SCRIPTS: true
+        run: |
+          pnpm config set ignore-scripts false
+          pnpm install
 
       - name: Build docs
         run: pnpm doc:build
