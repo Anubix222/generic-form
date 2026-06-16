@@ -71,6 +71,9 @@
     "yup": "^1.7.1"
   },
   "pnpm": {
-    "ignoredBuiltDependencies": []
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "@biomejs/biome"
+    ]
   }
 }
