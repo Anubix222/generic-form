@@ -7,7 +7,7 @@ export default defineConfig({
   root: path.join(__dirname, 'docs'),
   title: 'generic-form',
   lang: 'es',
-  base: '/index/',
+  base: '/generic-form/',
   builderConfig: {
     plugins: [
       pluginWorkspaceDev({
