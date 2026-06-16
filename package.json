@@ -71,10 +71,6 @@
     "yup": "^1.7.1"
   },
   "pnpm": {
-    "onlyBuiltDependencies": [
-      "esbuild",
-      "@rspress/core",
-      "rspress"
-    ]
+    "ignoredBuiltDependencies": []
   }
 }
