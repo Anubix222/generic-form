@@ -203,8 +203,8 @@ Hereda `IOptionsProps` (extiende `ICommonProps` con `options`, `defaultValue`, `
   label: 'Categoría',
   gridValues: { xs: 12, sm: 6 },
   options: [
-    { label: 'Opción A', value: 'a' },
-    { label: 'Opción B', value: 'b' },
+    { denominacion: 'Opción A', idconcepto: 'a' },
+    { denominacion: 'Opción B', idconcepto: 'b' },
   ],
   validations: { required: true },
 }
@@ -233,8 +233,8 @@ Mismas props que `select` sin `showDelete`, con soporte para selección múltipl
   label: 'Categorías',
   gridValues: { xs: 12 },
   options: [
-    { label: 'Opción A', value: 'a' },
-    { label: 'Opción B', value: 'b' },
+    { denominacion: 'Opción A', idconcepto: 'a' },
+    { denominacion: 'Opción B', idconcepto: 'b' },
   ],
 }
 ```
@@ -252,8 +252,8 @@ Hereda `IOptionsProps`.
   label: 'País',
   gridValues: { xs: 12, sm: 6 },
   options: [
-    { label: 'Cuba', value: 'cu' },
-    { label: 'España', value: 'es' },
+    { denominacion: 'Cuba', idconcepto: 'cu' },
+    { denominacion: 'España', idconcepto: 'es' },
   ],
   loadingText: 'Cargando...',
 }
