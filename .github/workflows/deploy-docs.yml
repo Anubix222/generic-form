@@ -36,7 +36,9 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install --ignore-scripts=false
+        run: pnpm install --no-frozen-lockfile
+        env:
+          PNPM_BUILD_APPROVED: esbuild
 
       - name: Build docs
         run: pnpm doc:build
