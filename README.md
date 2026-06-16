@@ -34,9 +34,8 @@ import App from "./App";
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <LanguageProvider>
-      <Notifications>
-        <App />
-      </Notifications>
+      <App />
+      <Notifications />
     </LanguageProvider>
   </StrictMode>,
 );
@@ -57,7 +56,7 @@ export const FormularioUsuario = () => (
         name: "nombre",
         label: "Nombre",
         gridValues: { xs: 12, sm: 6 },
-        validations: { required: true },
+        validations: { required: { message: "Este campo es requerido" } },
       },
       {
         type: "select",
@@ -68,7 +67,7 @@ export const FormularioUsuario = () => (
           { label: "Admin", value: "admin" },
           { label: "Usuario", value: "user" },
         ],
-        validations: { required: true },
+        validations: { required: { message: "Este campo es requerido" } },
       },
       {
         type: "check",

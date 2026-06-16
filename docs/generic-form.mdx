@@ -16,7 +16,7 @@ import { GenericForm } from "generic-form";
       name: "nombre",
       label: "Nombre",
       gridValues: { xs: 12, sm: 6 },
-      validations: { required: true },
+      validations: { required: { message: "Este campo es requerido" } },
     },
     {
       type: "number",
@@ -504,14 +504,14 @@ export const FormularioUsuario = ({ idForEdit, onClose }) => (
         name: "nombre",
         label: "Nombre",
         gridValues: { xs: 12, sm: 6 },
-        validations: { required: true },
+        validations: { required: { message: "Este campo es requerido" } },
       },
       {
         type: "text",
         name: "apellido",
         label: "Apellido",
         gridValues: { xs: 12, sm: 6 },
-        validations: { required: true },
+        validations: { required: { message: "Este campo es requerido" } },
       },
       {
         type: "select",
@@ -522,7 +522,7 @@ export const FormularioUsuario = ({ idForEdit, onClose }) => (
           { label: "Admin", value: "admin" },
           { label: "Usuario", value: "user" },
         ],
-        validations: { required: true },
+        validations: { required: { message: "Este campo es requerido" } },
       },
       {
         type: "number",
@@ -530,7 +530,7 @@ export const FormularioUsuario = ({ idForEdit, onClose }) => (
         label: "Edad",
         format: "units",
         gridValues: { xs: 12, sm: 6 },
-        validations: { required: true, min: 18 },
+        validations: { required: { message: "Este campo es requerido" } },
       },
       {
         type: "date",
