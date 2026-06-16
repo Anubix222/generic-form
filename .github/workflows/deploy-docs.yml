@@ -35,11 +35,8 @@ jobs:
           node-version: 26
           cache: pnpm
 
-      - name: Configure pnpm
-        run: pnpm config set ignore-scripts false
-
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --ignore-scripts=false
 
       - name: Build docs
         run: pnpm doc:build
